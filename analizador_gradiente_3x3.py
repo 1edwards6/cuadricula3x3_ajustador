@@ -69,7 +69,7 @@ def find_best_grid(gradient: np.ndarray):
     height, width = gradient.shape
     integral = integral_image(gradient)
     pairs = []
-    for first in range(10, 80, 5):
+    for first in range(10, 70, 5):
         for second in range(first + 20, 91, 5):
             if second <= 90:
                 pairs.append((first, second))
@@ -131,6 +131,15 @@ defaults = {"x1_pct": 35, "x2_pct": 65, "y1_pct": 35, "y2_pct": 65}
 for key, value in defaults.items():
     if key not in st.session_state:
         st.session_state[key] = value
+
+# Keep positions from older app sessions inside the safe slider ranges.
+for key in ("x1_pct", "y1_pct"):
+    st.session_state[key] = max(10, min(65, int(st.session_state[key])))
+for first_key, second_key in (("x1_pct", "x2_pct"), ("y1_pct", "y2_pct")):
+    st.session_state[second_key] = max(
+        int(st.session_state[first_key]) + 20,
+        min(90, int(st.session_state[second_key])),
+    )
 
 uploaded = st.file_uploader(
     "Carga una imagen", type=["png", "jpg", "jpeg", "webp", "bmp", "tif", "tiff"]
@@ -205,7 +214,7 @@ if st.session_state["y2_pct"] < st.session_state["y1_pct"] + 20:
 st.subheader("Ajuste manual de la cuadrícula")
 left, right = st.columns(2)
 with left:
-    st.slider("Línea vertical izquierda (%)", 10, 70, step=5, key="x1_pct")
+    st.slider("Línea vertical izquierda (%)", 10, 65, step=5, key="x1_pct")
     # Update the valid range before rendering the dependent slider.
     if st.session_state["x2_pct"] < st.session_state["x1_pct"] + 20:
         st.session_state["x2_pct"] = min(90, st.session_state["x1_pct"] + 20)
@@ -217,7 +226,7 @@ with left:
         key="x2_pct",
     )
 with right:
-    st.slider("Línea horizontal superior (%)", 10, 70, step=5, key="y1_pct")
+    st.slider("Línea horizontal superior (%)", 10, 65, step=5, key="y1_pct")
     if st.session_state["y2_pct"] < st.session_state["y1_pct"] + 20:
         st.session_state["y2_pct"] = min(90, st.session_state["y1_pct"] + 20)
     st.slider(
